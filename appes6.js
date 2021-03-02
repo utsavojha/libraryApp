@@ -66,6 +66,59 @@ class UI {
     }
 }
 
+// storage class
+class Store {
+    // METHODS
+    // get books from local storage
+    static getBooks() {
+        let books;
+        if (localStorage.getItem('books') === null) {
+            books = [];
+        } else {
+            books = JSON.parse(localStorage.getItem('books'));
+        }
+        return books;
+    }
+
+    // display books in UI
+    static displayBooks() {
+        const books = Store.getBooks();
+
+        books.forEach(function (book) {
+            const ui = new UI();
+
+            ui.addBookToList(book);
+        });
+    }
+
+    // add book to localStorage
+    static addBook(book) {
+        // books list is equal to books in local storage
+        const books = Store.getBooks();
+
+        // push book instance to localStorage bookslist
+        books.push(book);
+
+        // set localStorage with new book
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+
+    // remove book from localStorage
+    static removeBook(isbn) {
+        const books = Store.getBooks();
+
+        books.forEach(function (book, index) {
+            if (book.isbn === isbn) {
+                books.splice(index, 1);
+            }
+        });
+
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+}
+
+// event listener on-page load display books in localStorage
+document.addEventListener('DOMContentLoaded', Store.displayBooks);
 
 // EVENT LISTENERS
 // add book event listener
@@ -94,6 +147,9 @@ document.getElementById('book-form').addEventListener('submit', function (e) {
         // add book to list
         ui.addBookToList(book);
 
+        // add book to locaStorage
+        Store.addBook(book);
+
         // show success alert
         ui.showAlert(`Success, ${book.title} added to Library`, 'success');
 
@@ -112,6 +168,9 @@ document.getElementById('book-list').addEventListener('click', function (e) {
 
     // delte target el
     ui.deleteBook(e.target);
+
+    // delete from localStorage
+    Store.removeBook(e.target.parentElement.previousElementSibling.textContent); //isbn number
 
     // show removed alert
     ui.showAlert(`Book Removed!`, 'success');
